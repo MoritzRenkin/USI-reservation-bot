@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 import configparser
 import sys
 import time
+from datetime import datetime
 
 
 def get_config_kwargs() -> dict:
@@ -14,6 +15,10 @@ def get_config_kwargs() -> dict:
 
     kwargs['kurse'] = kwargs['kurse'].split(',')
     assert len(kwargs['kurse']) != 0
+
+    start_str = kwargs['start']
+    start_obj = datetime.strptime(start_str, '%d/%m/%Y %H:%M')
+    kwargs['start'] = start_obj
 
     return kwargs
 
@@ -70,14 +75,15 @@ class UsiDriver:
     def reserve_course(self, course_id):
 
         while True:
-            search_box = self.driver.find_element_by_id('searchPattern')
+            search_box = self.driver.find_element(By.ID, 'searchPattern')
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
 
             try:
-                reservieren_link = self.driver.find_element_by_link_text('Reservieren')
+                reservieren_link = self.driver.find_element(By.LINK_TEXT, 'Reservieren')
                 reservieren_link.click()
+
             except Exception as e:
                 print('Link mit \'Reservieren\' nicht gefunden', file=sys.stderr, flush=True)
                 if user_input_continue() is False:
