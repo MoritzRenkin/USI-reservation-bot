@@ -8,6 +8,7 @@ import pause
 from datetime import datetime
 import logging
 import time
+from collections import OrderedDict
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', stream=sys.stdout)
@@ -19,36 +20,24 @@ def get_config_kwargs() -> dict:
 
     kwargs = dict(config['main'])
 
-    kwargs['kurse'] = kwargs['kurse'].split(',')
-    assert len(kwargs['kurse']) != 0
+    kwargs['kurse_semesterbetrieb'] = kwargs['kurse_semesterbetrieb'].split(',')
+    while '' in kwargs['kurse_semesterbetrieb']: kwargs['kurse_semesterbetrieb'].remove('')
+
+    kwargs['kurse_jahresbetrieb'] = kwargs['kurse_jahresbetrieb'].split(',')
+    while '' in kwargs['kurse_jahresbetrieb']: kwargs['kurse_jahresbetrieb'].remove('')
+
+    assert len(kwargs['kurse_semesterbetrieb']) + len(kwargs['kurse_jahresbetrieb']) != 0
 
     start_str = kwargs['start']
     start_obj = datetime.strptime(start_str, '%d/%m/%Y %H:%M')
     kwargs['start'] = start_obj
 
-    jahresbetrieb = str(kwargs['jahresbetrieb']).lower()
-    assert jahresbetrieb == 'ja' or jahresbetrieb == 'nein'
-    kwargs['jahresbetrieb'] = True if jahresbetrieb == 'ja' else False
-
     return kwargs
-
-
-def user_input_continue(count=0):
-    if count > 10:
-        return False
-
-    u_input = input('Continue? (\'y\'|\'n\') ')
-    if u_input == 'y':
-        return True
-    elif u_input == 'n':
-        return False
-    else:
-        return user_input_continue(count+1)
 
 
 class UsiDriver:
 
-    _implicit_wait = 5
+    _implicit_wait = 7
 
     def __init__(self, browser:str):
         """
@@ -65,7 +54,7 @@ class UsiDriver:
         self.driver.implicitly_wait(self._implicit_wait)
 
     def login(self, username, password, institution):
-        self.driver.get('https://www.usi-wien.at/anmeldung/')
+        self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
         if institution == 'Universität Wien':
             uni_dropdown = Select(self.driver.find_element(By.ID, ('idpSelectSelector')))
@@ -84,21 +73,34 @@ class UsiDriver:
         else:
             raise RuntimeError(f'Institution {institution} not supported.')
 
-    def reserve_course(self, course_id, jahresbetrieb, wait_for_unlock=False):
+    def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
 
         while True:
             if wait_for_unlock:
                 time.sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
 
-            search_box = self.driver.find_element(By.ID, 'searchPattern')
-            self.driver.implicitly_wait(1)
+            try:
+                search_box = self.driver.find_element(By.ID, 'searchPattern')
+            except NoSuchElementException or StaleElementReferenceException:
+                self.driver.implicitly_wait(self._implicit_wait)
+                self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
+                search_box = self.driver.find_element(By.ID, 'searchPattern')
+
+            self.driver.implicitly_wait(.5)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
+            time.sleep(.5)
+
+            course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
+            reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
+            if 'Ausgebucht' in reservation_cell.get_attribute('innerHTML').strip():
+                logging.warning(f'Kurs {course_id} bereits ausgebucht!')
+                return False
 
             if jahresbetrieb:
                 try:
-                    jahresbetrieb_link = self.driver.find_element(By.LINK_TEXT, 'Reservieren Jahr')
+                    jahresbetrieb_link = course_table.find_element(By.LINK_TEXT, 'Reservieren Jahr')
                     jahresbetrieb_link.click()
                     logging.info(f'Kurs {course_id} im Jahresbetrieb reserviert.')
                     return True
@@ -107,48 +109,71 @@ class UsiDriver:
 
 
             try:
-                reservieren_link = self.driver.find_element(By.LINK_TEXT, 'Reservieren')
+                reservieren_link = course_table.find_element(By.LINK_TEXT, 'Reservieren')
                 reservieren_link.click()
                 logging.info(f'Kurs {course_id} im Semesterbetrieb reserviert.')
                 return True
 
             except NoSuchElementException:
                 if wait_for_unlock:
-                    if 'Ausgebuct' not in self.driver.page_source:
-                        continue
-                    else:
-                        logging.warning(f'Kurs {course_id} bereits ausgebucht!')
+                    continue
 
                 logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
                 return False
 
 
-
-
 def main():
     kwargs = get_config_kwargs()
-    courses: list[str] = kwargs['kurse']
+
+    courses_is_year = OrderedDict()
+    for course in kwargs['kurse_semesterbetrieb']:
+        courses_is_year[course] = False
+    for course in kwargs['kurse_jahresbetrieb']:
+        courses_is_year[course] = True
+
     start_time = kwargs['start']
+    n_successes = 0
+    n_total = len(courses_is_year)
+
+
+    logging.info(f'{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}')
 
     if start_time > datetime.now():
         logging.info(f"Pausiert bis {start_time}")
         pause.until(start_time)
 
+    logging.info("Webdriver wird gestartet...")
     usi_driver = UsiDriver(browser=kwargs['browser'])
 
     try:
         usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['institution'])
 
-        for i, course in enumerate(courses):
-            wait_for_unlock = True if i==0 else False
-            usi_driver.reserve_course(course, jahresbetrieb=kwargs['jahresbetrieb'], wait_for_unlock=wait_for_unlock)
+        is_first_course = True
+        for course, is_year in courses_is_year.items():
+            try:
+                is_success = usi_driver.reserve_course(course, jahresbetrieb=is_year, wait_for_unlock=is_first_course)
+                if is_success:
+                    n_successes += 1
+                is_first_course = False
+
+            except WebDriverException:
+                logging.exception(f"Webdriver Exception für Kurs {course}. Existiert der Kurs?")
+
+            time.sleep(.5)
+
+
+        logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden!!!')
+        if n_successes != 0:
+            usi_driver.driver.find_element(By.LINK_TEXT, 'bezahlen').click()
 
     except Exception as e:
         logging.exception("Uncaught exception")
         raise e
 
     finally:
-        input("Press enter to exit and close the browser.")
+        answer = str()
+        while answer != 'q':
+            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden.").strip()
         usi_driver.driver.quit()
 
 
