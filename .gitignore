@@ -1,2 +1,4 @@
 conf.ini
 *.log
+.idea
+venv
