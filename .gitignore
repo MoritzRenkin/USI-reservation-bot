@@ -1,4 +1,5 @@
 conf.ini
 *.log
 .idea
+.wdm
 venv

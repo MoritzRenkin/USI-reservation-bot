@@ -1,14 +1,22 @@
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import *
-import selenium
 import configparser
 import sys
-import pause
+import os
 from datetime import datetime
 import logging
 import time
+import pause
 from collections import OrderedDict
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import *
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.edge.service import Service as EdgeService
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', stream=sys.stdout)
@@ -44,10 +52,13 @@ class UsiDriver:
         :param browser: 'firefox' or 'chrome'.
             Geckodriver or Chromedriver need to be installed for the respective option to work
         """
+        os.environ['WDM_LOCAL'] = '1'
         if browser == 'firefox':
-            self.driver = selenium.webdriver.Firefox()
+            self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
         elif browser == 'chrome':
-            self.driver = selenium.webdriver.Chrome()
+            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+        elif browser == 'edge':
+            self.driver =webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
         else:
             raise RuntimeError("Invalid browser")
 
@@ -173,7 +184,7 @@ def main():
     finally:
         answer = str()
         while answer != 'q':
-            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden.").strip()
+            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. ").strip()
         usi_driver.driver.quit()
 
 
