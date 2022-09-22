@@ -1,10 +1,16 @@
-from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import *
+import selenium
 import configparser
 import sys
-import time
+import pause
 from datetime import datetime
+import logging
+import time
+
+
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', stream=sys.stdout)
 
 
 def get_config_kwargs() -> dict:
@@ -19,6 +25,10 @@ def get_config_kwargs() -> dict:
     start_str = kwargs['start']
     start_obj = datetime.strptime(start_str, '%d/%m/%Y %H:%M')
     kwargs['start'] = start_obj
+
+    jahresbetrieb = str(kwargs['jahresbetrieb']).lower()
+    assert jahresbetrieb == 'ja' or jahresbetrieb == 'nein'
+    kwargs['jahresbetrieb'] = True if jahresbetrieb == 'ja' else False
 
     return kwargs
 
@@ -38,19 +48,21 @@ def user_input_continue(count=0):
 
 class UsiDriver:
 
+    _implicit_wait = 5
+
     def __init__(self, browser:str):
         """
         :param browser: 'firefox' or 'chrome'.
             Geckodriver or Chromedriver need to be installed for the respective option to work
         """
         if browser == 'firefox':
-            self.driver = webdriver.Firefox()
+            self.driver = selenium.webdriver.Firefox()
         elif browser == 'chrome':
-            self.driver = webdriver.Chrome()
+            self.driver = selenium.webdriver.Chrome()
         else:
             raise RuntimeError("Invalid browser")
 
-        self.driver.implicitly_wait(5)
+        self.driver.implicitly_wait(self._implicit_wait)
 
     def login(self, username, password, institution):
         self.driver.get('https://www.usi-wien.at/anmeldung/')
@@ -72,32 +84,68 @@ class UsiDriver:
         else:
             raise RuntimeError(f'Institution {institution} not supported.')
 
-    def reserve_course(self, course_id):
+    def reserve_course(self, course_id, jahresbetrieb, wait_for_unlock=False):
 
         while True:
+            if wait_for_unlock:
+                time.sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
+
             search_box = self.driver.find_element(By.ID, 'searchPattern')
+            self.driver.implicitly_wait(1)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
 
+            if jahresbetrieb:
+                try:
+                    jahresbetrieb_link = self.driver.find_element(By.LINK_TEXT, 'Reservieren Jahr')
+                    jahresbetrieb_link.click()
+                    logging.info(f'Kurs {course_id} im Jahresbetrieb reserviert.')
+                    return True
+                except NoSuchElementException:
+                    logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
+
+
             try:
                 reservieren_link = self.driver.find_element(By.LINK_TEXT, 'Reservieren')
                 reservieren_link.click()
+                logging.info(f'Kurs {course_id} im Semesterbetrieb reserviert.')
+                return True
 
-            except Exception as e:
-                print('Link mit \'Reservieren\' nicht gefunden', file=sys.stderr, flush=True)
-                if user_input_continue() is False:
-                    break
+            except NoSuchElementException:
+                if wait_for_unlock:
+                    if 'Ausgebuct' not in self.driver.page_source:
+                        continue
+                    else:
+                        logging.warning(f'Kurs {course_id} bereits ausgebucht!')
+
+                logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
+                return False
+
 
 
 
 def main():
     kwargs = get_config_kwargs()
+    courses: list[str] = kwargs['kurse']
+    start_time = kwargs['start']
+
+    if start_time > datetime.now():
+        logging.info(f"Pausiert bis {start_time}")
+        pause.until(start_time)
 
     usi_driver = UsiDriver(browser=kwargs['browser'])
 
     try:
         usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['institution'])
+
+        for i, course in enumerate(courses):
+            wait_for_unlock = True if i==0 else False
+            usi_driver.reserve_course(course, jahresbetrieb=kwargs['jahresbetrieb'], wait_for_unlock=wait_for_unlock)
+
+    except Exception as e:
+        logging.exception("Uncaught exception")
+        raise e
 
     finally:
         input("Press enter to exit and close the browser.")
