@@ -40,6 +40,8 @@ def get_config_kwargs() -> dict:
     start_obj = datetime.strptime(start_str, '%d/%m/%Y %H:%M')
     kwargs['start'] = start_obj
 
+    kwargs['browser'] = str(kwargs['browser']).lower()
+
     return kwargs
 
 
@@ -97,11 +99,11 @@ class UsiDriver:
                 self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
 
-            self.driver.implicitly_wait(.5)
+            self.driver.implicitly_wait(1)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
-            time.sleep(.5)
+            time.sleep(1)
 
             course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
@@ -161,6 +163,7 @@ def main():
 
         is_first_course = True
         for course, is_year in courses_is_year.items():
+            course = str(course).strip()
             try:
                 is_success = usi_driver.reserve_course(course, jahresbetrieb=is_year, wait_for_unlock=is_first_course)
                 if is_success:
@@ -168,7 +171,7 @@ def main():
                 is_first_course = False
 
             except WebDriverException:
-                logging.exception(f"Webdriver Exception für Kurs {course}. Existiert der Kurs?")
+                logging.error(f"Webdriver Exception für Kurs {course}. Existiert der Kurs?")
 
             time.sleep(.5)
 
