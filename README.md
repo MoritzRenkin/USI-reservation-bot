@@ -6,7 +6,7 @@ DISCLAIMER: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nu
 
 ## Setup (nur vor der ersten Verwendung)
 
-Der Bot ist als Python Skript entwickelt und benötigt Python 3.9 oder neuer zur Ausführung. Die neueste Python Version kann <a href="">hier</a> heruntergeladen werden.
+Der Bot ist als Python Skript entwickelt und benötigt Python 3.9 oder neuer zur Ausführung. Die neueste Python Version kann <a href="https://www.python.org/downloads/">hier</a> heruntergeladen werden.
 Die notwendigen Dependencies können mittels Commandline (Windows) bzw. Shell (Mac OSX/Linux) wie folgend installiert werden: 
 ```
 pip install -r <Pfad-zum-Projekt>/requirements.txt
