@@ -18,11 +18,11 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 
-
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', stream=sys.stdout)
 
 
 def get_config_kwargs() -> dict:
+
     config = configparser.ConfigParser()
     config.read('conf.ini', encoding='UTF-8')
 
@@ -50,10 +50,7 @@ class UsiDriver:
     _implicit_wait = 7
 
     def __init__(self, browser:str):
-        """
-        :param browser: 'firefox' or 'chrome'.
-            Geckodriver or Chromedriver need to be installed for the respective option to work
-        """
+
         os.environ['WDM_LOCAL'] = '1'
         if browser == 'firefox':
             self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
@@ -67,6 +64,7 @@ class UsiDriver:
         self.driver.implicitly_wait(self._implicit_wait)
 
     def login(self, username, password, institution):
+
         self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
         if institution == 'Universität Wien':
@@ -107,6 +105,7 @@ class UsiDriver:
 
             course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
+
             if 'Ausgebucht' in reservation_cell.get_attribute('innerHTML').strip():
                 logging.warning(f'Kurs {course_id} bereits ausgebucht!')
                 return False
@@ -117,6 +116,7 @@ class UsiDriver:
                     jahresbetrieb_link.click()
                     logging.info(f'Kurs {course_id} im Jahresbetrieb reserviert.')
                     return True
+
                 except NoSuchElementException:
                     logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
 
@@ -136,18 +136,20 @@ class UsiDriver:
 
 
 def main():
+
     kwargs = get_config_kwargs()
 
     courses_is_year = OrderedDict()
+
     for course in kwargs['kurse_semesterbetrieb']:
         courses_is_year[course] = False
+
     for course in kwargs['kurse_jahresbetrieb']:
         courses_is_year[course] = True
 
     start_time = kwargs['start']
     n_successes = 0
     n_total = len(courses_is_year)
-
 
     logging.info(f'{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}')
 
@@ -188,6 +190,7 @@ def main():
         answer = str()
         while answer != 'q':
             answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. ").strip()
+
         usi_driver.driver.quit()
 
 
