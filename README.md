@@ -21,4 +21,4 @@ Der Bot wird in der Commandline bzw. Shell gestartet:
 python3 <Pfad-zum-Projekt>/usi_reservation_bot.py
 ```
 
-Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver ferngesteuerten Benutzung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Problemen mit der Firewall kommen.
+Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Problemen mit der Firewall kommen.
