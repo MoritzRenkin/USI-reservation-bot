@@ -6,6 +6,8 @@ import logging
 import time
 import pause
 from collections import OrderedDict
+from wakepy import keepawake
+from playsound import playsound
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
@@ -18,13 +20,14 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s', stream=sys.stdout)
-
+logging.basicConfig(level=logging.INFO, format='%(name)s- %(levelname)s: %(message)s ', stream=sys.stdout)
+logging.getLogger('playsound').setLevel(logging.WARNING)
+project_directory = os.path.dirname(__file__)
 
 def get_config_kwargs() -> dict:
 
     config = configparser.ConfigParser()
-    config.read('conf.ini', encoding='UTF-8')
+    config.read(os.path.join(project_directory,'conf.ini'), encoding='UTF-8')
 
     kwargs = dict(config['main'])
 
@@ -41,6 +44,12 @@ def get_config_kwargs() -> dict:
     kwargs['start'] = start_obj
 
     kwargs['browser'] = str(kwargs['browser']).lower()
+
+    energiesparen_verhindern = str(kwargs['os_standby_verhindern']).lower()
+    kwargs['os_standby_verhindern'] = True if energiesparen_verhindern=="ja" or energiesparen_verhindern=="true" else False
+
+    alarm = str(kwargs['alarm']).lower()
+    kwargs['alarm'] = True if alarm=="ja" or alarm=="true" else False
 
     return kwargs
 
@@ -81,14 +90,22 @@ class UsiDriver:
 
             self.driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div/div/div[2]/form/div[3]/div/button').click()
 
+            try:
+                self.driver.find_element(By.ID, 'searchPattern')
+            except WebDriverException as e:
+                logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
+                raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
+
+        # TODO add elif, support more institutions
+
         else:
-            raise RuntimeError(f'Institution {institution} not supported.')
+            raise RuntimeError(f'Institution {institution} nicht unterstützt.')
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
 
         while True:
             if wait_for_unlock:
-                time.sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
+                time.sleep(2)  # prevent too many queries and potentially triggering Anti-DOS measures
 
             try:
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
@@ -148,6 +165,7 @@ def main():
         courses_is_year[course] = True
 
     start_time = kwargs['start']
+
     n_successes = 0
     n_total = len(courses_is_year)
 
@@ -155,13 +173,20 @@ def main():
 
     if start_time > datetime.now():
         logging.info(f"Pausiert bis {start_time}")
-        pause.until(start_time)
+
+        if kwargs['os_standby_verhindern']:
+            logging.info("Standby des Betriebssystems wird verhindert.")
+            with keepawake(keep_screen_awake=True):
+                pause.until(start_time)
+
+        else:
+            pause.until(start_time)
 
     logging.info("Webdriver wird gestartet...")
     usi_driver = UsiDriver(browser=kwargs['browser'])
 
     try:
-        usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['institution'])
+        usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution'])
 
         is_first_course = True
         for course, is_year in courses_is_year.items():
@@ -172,11 +197,10 @@ def main():
                     n_successes += 1
                 is_first_course = False
 
-            except WebDriverException:
-                logging.error(f"Webdriver Exception für Kurs {course}. Existiert der Kurs?")
+            except WebDriverException as e:
+                logging.error(f"Webdriver Exception ({e}) bei Kurs {course}. Exisitiert der Kurs?")
 
             time.sleep(.5)
-
 
         logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden!!!')
         if n_successes != 0:
@@ -187,6 +211,10 @@ def main():
         raise e
 
     finally:
+        if kwargs['alarm']:
+            for _ in range(2):
+                playsound(os.path.join(project_directory, "sounds/alarm.wav"))
+
         answer = str()
         while answer != 'q':
             answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. ").strip()
