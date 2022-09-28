@@ -27,7 +27,7 @@ project_directory = os.path.dirname(__file__)
 def get_config_kwargs() -> dict:
 
     config = configparser.ConfigParser()
-    config.read(os.path.join(project_directory,'conf.ini'), encoding='UTF-8')
+    config.read(os.path.join(project_directory, 'config.ini'), encoding='UTF-8')
 
     kwargs = dict(config['main'])
     kwargs = { key:str(value).strip() for key, value in kwargs.items() }
