@@ -24,7 +24,7 @@ python3 -m pip install -r "<Pfad-zum-Projekt>/requirements.txt"
 
 Vor dem Ausführen des Bots muss die ``conf.ini`` Datei mit euren Anmeldedaten und den zu reservierenden Kursen befüllt werden. Derzeit wird nur das Login über die Universität Wien unterstützt.
 
-Der Bot wird in der Commandline bzw. Shell gestartet.
+Es ist empfehlenswert, den Bot in der Commandline bzw. Shell zu starten.
 
 Windows:
 ```
