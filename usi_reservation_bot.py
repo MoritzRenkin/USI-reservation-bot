@@ -30,6 +30,7 @@ def get_config_kwargs() -> dict:
     config.read(os.path.join(project_directory,'conf.ini'), encoding='UTF-8')
 
     kwargs = dict(config['main'])
+    kwargs = { key:str(value).strip() for key, value in kwargs.items() }
 
     kwargs['kurse_semesterbetrieb'] = kwargs['kurse_semesterbetrieb'].split(',')
     while '' in kwargs['kurse_semesterbetrieb']: kwargs['kurse_semesterbetrieb'].remove('')
