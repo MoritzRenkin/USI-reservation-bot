@@ -20,7 +20,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 
-logging.basicConfig(level=logging.INFO, format='%(name)s- %(levelname)s: %(message)s ', stream=sys.stdout)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s ', stream=sys.stdout)
 logging.getLogger('playsound').setLevel(logging.WARNING)
 project_directory = os.path.dirname(__file__)
 
