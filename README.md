@@ -1,6 +1,6 @@
 # USI-registration-bot
 
-Der USI-reservation-bot kann das Reservieren von Kursen am <a href="https://www.usi.at/">Universitätssportinstituts Wien (USI)</a> automatisieren. Der Bot kann lediglich Reservierungen vornehmen, es werden keine Käufe durch das Programm abgeschlossen.
+Der USI-reservation-bot kann das Reservieren von Kursen am <a href="https://www.usi.at/">Universitätssportinstitut Wien (USI)</a> automatisieren. Der Bot kann lediglich Reservierungen vornehmen, es werden keine Käufe durch das Programm abgeschlossen.
 
 Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzungsbedigungen des Universitätssportinstituts. Der enthaltene Code dient rein zu Bildungszwecken und jegliche Art von Ausführung erfolgt auf eigenes Risiko.
 
