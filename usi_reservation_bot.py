@@ -90,16 +90,16 @@ class UsiDriver:
 
             self.driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div/div/div[2]/form/div[3]/div/button').click()
 
-            try:
-                self.driver.find_element(By.ID, 'searchPattern')
-            except WebDriverException as e:
-                logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
-                raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
-
         # TODO add elif, support more institutions
 
         else:
             raise RuntimeError(f'Institution {institution} nicht unterstützt.')
+
+        try:
+            self.driver.find_element(By.ID, 'searchPattern')
+        except WebDriverException as e:
+            logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
+            raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
 
