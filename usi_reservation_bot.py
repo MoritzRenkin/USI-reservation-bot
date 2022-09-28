@@ -217,7 +217,7 @@ def main():
 
         answer = str()
         while answer != 'q':
-            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. ").strip()
+            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT!").strip()
 
         usi_driver.driver.quit()
 
