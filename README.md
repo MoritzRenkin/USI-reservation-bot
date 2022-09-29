@@ -33,7 +33,7 @@ py -3 "<Pfad-zum-Projekt>\usi_reservation_bot.py"
 
 macOS/Linux:
 ```
-python3 "<Pfad-zum-Projekt>/usi_reservation_bot"
+python3 "<Pfad-zum-Projekt>/usi_reservation_bot.py"
 ```
 
 Der Bot verwendet <a href="https://www.selenium.dev/" target="_blank">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Problemen mit der Firewall kommen.
