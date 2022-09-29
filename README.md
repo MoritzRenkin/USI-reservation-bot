@@ -8,7 +8,7 @@ Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzu
 
 Der Bot ist als Python Skript entwickelt und benötigt Python 3.9 oder neuer zur Ausführung. Die neueste Python Version kann <a href="https://www.python.org/downloads/" target="_blank">hier</a> heruntergeladen werden.
 
-Die notwendigen Dependencies können über die Commandline (Windows) bzw. Shell (macOS/Linux) wie folgt installiert werden: 
+Die notwendigen Dependencies können über den Command Prompt (Windows) bzw. Terminal (macOS/Linux) wie folgt installiert werden: 
 
 Windows:
 ```
@@ -24,7 +24,7 @@ python3 -m pip install -r "<Pfad-zum-Projekt>/requirements.txt"
 
 Vor dem Ausführen des Bots muss die ``config.ini`` Datei mit euren Anmeldedaten und den zu reservierenden Kursen befüllt werden. Derzeit wird nur das Login über die Universität Wien unterstützt.
 
-Es ist empfehlenswert, den Bot in der Commandline bzw. Shell zu starten.
+Es ist empfehlenswert, den Bot im Command Prompt bzw. Terminal zu starten.
 
 Windows:
 ```
