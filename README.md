@@ -22,7 +22,7 @@ python3 -m pip install -r "<Pfad-zum-Projekt>/requirements.txt"
 
 ## Verwendung
 
-Vor dem Ausführen des Bots muss ``config.ini`` mit euren Anmeldedaten und den zu reservierenden Kursen befüllt werden. Derzeit wird das Login über folgende Institute unterstützt: 
+Vor dem Ausführen des Bots muss ``config.ini`` mit den Anmeldedaten und den zu reservierenden Kursen befüllt werden. Derzeit wird das Login über folgende Institute unterstützt: 
 * Technische Universität Wien 
 * Universität Wien
 * OpenIdP (alle Anderen)
