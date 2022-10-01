@@ -8,7 +8,7 @@ Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzu
 
 Der Bot ist als Python Skript entwickelt und benötigt Python 3.9 oder neuer zur Ausführung. Die neueste Python Version kann <a href="https://www.python.org/downloads/" target="_blank">hier</a> heruntergeladen werden.
 
-Die notwendigen Dependencies können über den Command Prompt (Windows) bzw. Terminal (macOS/Linux) wie folgt installiert werden: 
+Die notwendigen Dependencies können über cmd (Windows) bzw. Terminal (macOS/Linux) wie folgt installiert werden: 
 
 Windows:
 ```
@@ -29,7 +29,8 @@ Vor dem Ausführen des Bots muss ``config.ini`` mit euren Anmeldedaten und den z
 
 Für andere Institute gerne bei mir melden oder selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``)
 
-Es ist empfehlenswert, den Bot im Command Prompt bzw. Terminal zu starten.
+
+Der Bot wird in cmd bzw. Terminal gestartet.
 
 Windows:
 ```
