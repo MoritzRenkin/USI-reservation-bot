@@ -77,19 +77,25 @@ class UsiDriver:
 
         self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
+        uni_dropdown = Select(self.driver.find_element(By.ID, ('idpSelectSelector')))
+        uni_dropdown.select_by_visible_text(institution)
+        self.driver.find_element(By.ID, 'idpSelectListButton').click()
+
         if institution == 'Universität Wien':
-            uni_dropdown = Select(self.driver.find_element(By.ID, ('idpSelectSelector')))
-            uni_dropdown.select_by_visible_text('Universität Wien')
-            self.driver.find_element(By.ID, 'idpSelectListButton').click()
+            self.driver.find_element(By.ID, 'userid').send_keys(username)
+            self.driver.find_element(By.ID, 'password').send_keys(password)
+            #self.driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div/div/div[2]/form/div[3]/div/button').click()
+            self.driver.find_element(By.CSS_SELECTOR, '.loginform > div:nth-child(4) > div:nth-child(1) > button:nth-child(1)').click()
 
-            # auth:
-            username_field = self.driver.find_element(By.ID, 'userid')
-            username_field.send_keys(username)
+        elif institution == 'Technische Universität Wien':
+            self.driver.find_element(By.ID, 'username').send_keys(username)
+            self.driver.find_element(By.ID, 'password').send_keys(password)
+            self.driver.find_element(By.ID, 'samlloginbutton').click()
 
-            password_field = self.driver.find_element(By.ID, 'password')
-            password_field.send_keys(password)
-
-            self.driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div/div/div[2]/form/div[3]/div/button').click()
+        elif institution == 'OpenIdP (alle Anderen)':
+            self.driver.find_element(By.ID, 'username').send_keys(username)
+            self.driver.find_element(By.ID, 'password').send_keys(password)
+            self.driver.find_element(By.ID, 'regularsubmit').click()
 
         # TODO add elif, support more institutions
 
@@ -153,6 +159,20 @@ class UsiDriver:
                 return False
 
 
+def pause_until_start(start_time: datetime, prevent_screenlock: bool):
+
+    if start_time > datetime.now():
+        logging.info(f"Pausiert bis {start_time}")
+
+        if prevent_screenlock:
+            logging.info("Standby des Betriebssystems wird verhindert.")
+            with keepawake(keep_screen_awake=True):
+                pause.until(start_time)
+
+        else:
+            pause.until(start_time)
+
+
 def main():
 
     kwargs = get_config_kwargs()
@@ -165,23 +185,12 @@ def main():
     for course in kwargs['kurse_jahresbetrieb']:
         courses_is_year[course] = True
 
-    start_time = kwargs['start']
-
     n_successes = 0
     n_total = len(courses_is_year)
+    start_time = kwargs['start']
 
     logging.info(f'{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}')
-
-    if start_time > datetime.now():
-        logging.info(f"Pausiert bis {start_time}")
-
-        if kwargs['os_standby_verhindern']:
-            logging.info("Standby des Betriebssystems wird verhindert.")
-            with keepawake(keep_screen_awake=True):
-                pause.until(start_time)
-
-        else:
-            pause.until(start_time)
+    pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
 
     logging.info("Webdriver wird gestartet...")
     usi_driver = UsiDriver(browser=kwargs['browser'])
