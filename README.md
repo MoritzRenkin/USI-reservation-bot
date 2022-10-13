@@ -2,7 +2,7 @@
 
 Der USI-reservation-bot kann das Reservieren von Kursen am <a href="https://www.usi.at/" target="_blank">Universitätssportinstitut Wien (USI)</a> automatisieren. Der Bot kann lediglich Reservierungen vornehmen, es werden keine Käufe durch das Programm abgeschlossen.
 
-Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzungsbedigungen des Universitätssportinstituts. Der enthaltene Code dient rein zu Bildungszwecken und jegliche Art von Ausführung erfolgt auf eigenes Risiko.
+Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzungsbedigungen des Universitätssportinstituts. Der enthaltene Code dient rein zu Bildungszwecken und jegliche Art von Ausführung erfolgt auf eigene Verantwortung.
 
 ## Setup (nur vor der ersten Verwendung)
 
@@ -27,7 +27,7 @@ Vor dem Ausführen des Bots muss ``config.ini`` mit den Anmeldedaten und den zu 
 * Universität Wien
 * OpenIdP (alle Anderen)
 
-Für andere Institute gerne fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``)
+Für andere Institute gerne einen Issue erzeugen oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``)
 
 
 Der Bot wird in cmd bzw. Terminal gestartet.
