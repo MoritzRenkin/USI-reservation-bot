@@ -27,7 +27,7 @@ Vor dem Ausführen des Bots muss ``config.ini`` mit den Anmeldedaten und den zu 
 * Universität Wien
 * OpenIdP (alle Anderen)
 
-Für andere Institute gerne einen Issue erzeugen oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``)
+Für andere Institute gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue</a> erzeugen oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``)
 
 
 Der Bot wird in cmd bzw. Terminal gestartet.
