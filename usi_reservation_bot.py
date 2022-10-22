@@ -112,9 +112,6 @@ class UsiDriver:
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
 
         while True:
-            if wait_for_unlock:
-                time.sleep(2)  # prevent too many queries and potentially triggering Anti-DOS measures
-
             try:
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
             except NoSuchElementException or StaleElementReferenceException:
@@ -154,6 +151,7 @@ class UsiDriver:
 
             except NoSuchElementException:
                 if wait_for_unlock:
+                    time.sleep(2)  # prevent too many queries and potentially triggering Anti-DOS measures
                     continue
 
                 logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
