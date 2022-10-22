@@ -61,7 +61,7 @@ class UsiDriver:
 
     def __init__(self, browser:str):
 
-        os.environ['WDM_LOCAL'] = '1'
+        os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
         if browser == 'firefox':
             self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
         elif browser == 'chrome':
@@ -72,6 +72,7 @@ class UsiDriver:
             raise RuntimeError("Invalid browser")
 
         self.driver.implicitly_wait(self._implicit_wait)
+
 
     def login(self, username, password, institution):
 
@@ -84,7 +85,6 @@ class UsiDriver:
         if institution == 'Universität Wien':
             self.driver.find_element(By.ID, 'userid').send_keys(username)
             self.driver.find_element(By.ID, 'password').send_keys(password)
-            #self.driver.find_element(By.XPATH, '/html/body/div[3]/div[2]/div/div/div/div[2]/form/div[3]/div/button').click()
             self.driver.find_element(By.CSS_SELECTOR, '.loginform > div:nth-child(4) > div:nth-child(1) > button:nth-child(1)').click()
 
         elif institution == 'Technische Universität Wien':
@@ -107,6 +107,7 @@ class UsiDriver:
         except WebDriverException as e:
             logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
             raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
+
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
 
@@ -214,7 +215,8 @@ def main():
 
         logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden!!!')
         if n_successes != 0:
-            usi_driver.driver.find_element(By.LINK_TEXT, 'bezahlen').click()
+            pay_link = usi_driver.driver.find_element(By.LINK_TEXT, 'bezahlen')
+            pay_link.click()
 
     except Exception as e:
         logging.exception("Uncaught exception")
@@ -223,11 +225,13 @@ def main():
     finally:
         if kwargs['alarm']:
             for _ in range(2):
-                playsound(os.path.join(project_directory, "sounds/alarm.wav"))
+                wav_path = os.path.join(project_directory, "sounds/alarm.wav")
+                playsound(wav_path)
 
         answer = str()
         while answer != 'q':
-            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT!").strip()
+            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT!")
+            answer = answer.strip()
 
         usi_driver.driver.quit()
 
