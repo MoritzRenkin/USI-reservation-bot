@@ -8,7 +8,7 @@ Hinweis: Die Nutzung dieses Programms verstößt möglicherweise gegen die Nutzu
 
 Der Bot ist als Python Skript entwickelt und benötigt Python 3.9 oder neuer zur Ausführung. Die neueste Python Version kann <a href="https://www.python.org/downloads/" target="_blank">hier</a> heruntergeladen werden.
 
-Die notwendigen Dependencies können über cmd (Windows) bzw. Terminal (macOS/Linux) installiert werden. Im Ordner des Projects: 
+Die notwendigen Dependencies können über cmd (Windows) bzw. Terminal (macOS/Linux) installiert werden. Im Ordner des Projekts: 
 
 Windows:
 ```
