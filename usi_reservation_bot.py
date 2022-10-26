@@ -24,6 +24,13 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s ', st
 logging.getLogger('playsound').setLevel(logging.WARNING)
 project_directory = os.path.dirname(__file__)
 
+console_header = r"""
+░█░█░█▀▀░▀█▀░░░░░█▀▄░█▀▀░█▀▀░█▀▀░█▀▄░█░█░█▀█░▀█▀░▀█▀░█▀█░█▀█░░░░░█▀▄░█▀█░▀█▀
+░█░█░▀▀█░░█░░▄▄▄░█▀▄░█▀▀░▀▀█░█▀▀░█▀▄░▀▄▀░█▀█░░█░░░█░░█░█░█░█░▄▄▄░█▀▄░█░█░░█░
+░▀▀▀░▀▀▀░▀▀▀░░░░░▀░▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀░▀░▀░░░░░▀▀░░▀▀▀░░▀░
+"""
+
+
 def get_config_kwargs() -> dict:
 
     config = configparser.ConfigParser()
@@ -176,6 +183,8 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool):
 def main():
 
     kwargs = get_config_kwargs()
+
+    print(console_header)
 
     courses_is_year = OrderedDict()
 
