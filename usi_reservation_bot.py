@@ -40,8 +40,9 @@ def get_config_kwargs() -> dict:
 
     assert len(kwargs['kurse_semesterbetrieb']) + len(kwargs['kurse_jahresbetrieb']) != 0
 
+    start_format = '%d.%m.%Y %H:%M'
     start_str = kwargs['start']
-    start_obj = datetime.strptime(start_str, '%d/%m/%Y %H:%M')
+    start_obj = datetime.strptime(start_str, start_format)
     kwargs['start'] = start_obj
 
     kwargs['browser'] = str(kwargs['browser']).lower()
@@ -222,7 +223,7 @@ def main():
 
     finally:
         if kwargs['alarm']:
-            for _ in range(2):
+            for _ in range(2): # alarm is played twice
                 wav_path = os.path.join(project_directory, "sounds/alarm.wav")
                 playsound(wav_path)
 
