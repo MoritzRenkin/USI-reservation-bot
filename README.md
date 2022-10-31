@@ -44,7 +44,7 @@ python3 usi_reservation_bot.py
 
 Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Warnmeldungen der Firewall kommen.
 
-Nachdem der Bot alle Reservierungen abgeschlossen hat, muss der Kaufvorgang in dem vom Bot gesteuerten Browser abgeschlossen werden. USI-Reservierungen verfallen überlichweise nach 30 Minuten, wenn der Kaufvorgang nicht abgeschlossen wird. Je nach Konfiguration in ``config.ini`` wird ein Alarmton abgespielt, sobald die manuelle Durchführung des Kaufvorgangs erforderlich ist. Der Alarm kann angepasst werden, indem das File ``sounds/alarm.wav``[^1] ersetzt wird. 
+Nachdem der Bot alle Reservierungen abgeschlossen hat, muss der Kaufvorgang in dem vom Bot gesteuerten Browser abgeschlossen werden. USI-Reservierungen verfallen ansonsten nach 30 Minuten. Je nach Konfiguration in ``config.ini`` wird ein Alarmton abgespielt, sobald die manuelle Durchführung des Kaufvorgangs erforderlich ist. Der Alarm kann angepasst werden, indem das File ``sounds/alarm.wav``[^1] ersetzt wird. 
 
 Das Programm bzw. der zugehörige Browser dürfen nicht frühzeitig geschlossen werden, da ansonsten die Reservierungen verloren gehen.
 
