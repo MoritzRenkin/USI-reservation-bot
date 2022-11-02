@@ -6,6 +6,7 @@ import logging
 import time
 import pause
 from collections import OrderedDict
+import getpass
 from wakepy import keepawake
 from playsound import playsound
 from selenium.webdriver.support.ui import Select
@@ -45,7 +46,7 @@ def get_config_kwargs() -> dict:
     kwargs['kurse_jahresbetrieb'] = kwargs['kurse_jahresbetrieb'].split(',')
     while '' in kwargs['kurse_jahresbetrieb']: kwargs['kurse_jahresbetrieb'].remove('')
 
-    assert len(kwargs['kurse_semesterbetrieb']) + len(kwargs['kurse_jahresbetrieb']) != 0
+    assert len(kwargs['kurse_semesterbetrieb']) + len(kwargs['kurse_jahresbetrieb']) != 0, "Keine Kurse angegeben!"
 
     start_format = '%d.%m.%Y %H:%M'
     start_str = kwargs['start']
@@ -60,7 +61,29 @@ def get_config_kwargs() -> dict:
     alarm = str(kwargs['alarm']).lower()
     kwargs['alarm'] = True if alarm=="ja" or alarm=="true" else False
 
+    # getting username and password if left empty
+    for cred_field in ['username', 'passwort']:
+        if not kwargs[cred_field]:
+            if cred_field == 'passwort':
+                kwargs[cred_field] = getpass.getpass(f"{cred_field}: ") # hide password input
+            else:
+                kwargs[cred_field] = input(f'{cred_field}: ').strip() # no need to hide other input
+            assert kwargs[cred_field], f"{cred_field} nicht angegeben!"
+
     return kwargs
+
+def pause_until_start(start_time: datetime, prevent_screenlock: bool):
+
+    if start_time > datetime.now():
+        logging.info(f"Pausiert bis {start_time}")
+
+        if prevent_screenlock:
+            logging.info("Standby des Betriebssystems wird verhindert.")
+            with keepawake(keep_screen_awake=True):
+                pause.until(start_time)
+
+        else:
+            pause.until(start_time)
 
 
 class UsiDriver:
@@ -166,25 +189,10 @@ class UsiDriver:
                 return False
 
 
-def pause_until_start(start_time: datetime, prevent_screenlock: bool):
-
-    if start_time > datetime.now():
-        logging.info(f"Pausiert bis {start_time}")
-
-        if prevent_screenlock:
-            logging.info("Standby des Betriebssystems wird verhindert.")
-            with keepawake(keep_screen_awake=True):
-                pause.until(start_time)
-
-        else:
-            pause.until(start_time)
-
-
 def main():
+    print(console_header)
 
     kwargs = get_config_kwargs()
-
-    print(console_header)
 
     courses_is_year = OrderedDict()
 
