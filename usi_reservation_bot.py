@@ -123,6 +123,11 @@ class UsiDriver:
             self.driver.find_element(By.ID, 'password').send_keys(password)
             self.driver.find_element(By.ID, 'samlloginbutton').click()
 
+            time.sleep(1)
+            if 'getconsent' in self.driver.current_url: # Zustimmung zur Weitergabe persönlicher Daten
+                yes_button = self.driver.find_element(By.ID, 'yesbutton')
+                yes_button.click()
+
         elif institution == 'OpenIdP (alle Anderen)':
             self.driver.find_element(By.ID, 'username').send_keys(username)
             self.driver.find_element(By.ID, 'password').send_keys(password)
@@ -150,7 +155,7 @@ class UsiDriver:
                 self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
 
-            self.driver.implicitly_wait(1)
+            self.driver.implicitly_wait(2)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
@@ -182,7 +187,7 @@ class UsiDriver:
 
             except NoSuchElementException:
                 if wait_for_unlock:
-                    time.sleep(2)  # prevent too many queries and potentially triggering Anti-DOS measures
+                    time.sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
                     continue
 
                 logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
@@ -229,7 +234,7 @@ def main():
 
             time.sleep(.5)
 
-        logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden!!!')
+        logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden.')
         if n_successes != 0:
             pay_link = usi_driver.driver.find_element(By.LINK_TEXT, 'bezahlen')
             pay_link.click()
@@ -246,7 +251,7 @@ def main():
 
         answer = str()
         while answer != 'q':
-            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT!")
+            answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT! ")
             answer = answer.strip()
 
         usi_driver.driver.quit()
