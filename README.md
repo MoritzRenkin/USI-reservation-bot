@@ -22,7 +22,13 @@ python3 -m pip install -r requirements.txt
 
 ## Verwendung
 
-Vor dem Ausführen des Bots muss ``config.ini`` mit den Anmeldedaten und den zu reservierenden Kursen befüllt werden. Derzeit wird das Login über folgende Institute unterstützt: 
+Vor dem Ausführen muss der Bots in der Datei ``config.ini`` konfiguriert werden. Vor allem folgende Felder sollten überprüft und ggf. angepasst werden:
+* ``login_institution`` siehe unterstützte Institute unterhalb
+* ``kurse_semesterbetrieb`` bzw. ``kurse_jahresbetrieb``
+* ``browser`` Die neueste Version des Browsers muss installiert sein.
+*  ``start`` Der Start der Anmeldungen wird normalerweise auf <a href="https://www.usi.at/">usi.at</a> unter Termine angegeben.
+
+Derzeit wird das Login über folgende Institute unterstützt: 
 * Technische Universität Wien 
 * Universität Wien
 * OpenIdP (alle Anderen)
