@@ -72,7 +72,8 @@ def get_config_kwargs() -> dict:
 
     return kwargs
 
-def pause_until_start(start_time: datetime, prevent_screenlock: bool):
+
+def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
     if start_time > datetime.now():
         logging.info(f"Pausiert bis {start_time}")
@@ -88,24 +89,29 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool):
 
 class UsiDriver:
 
-    _implicit_wait = 7
+    _implicit_wait_default = 7
+    _implicit_wait_low = 2.5
+    _implicit_wait_minimal = .2
 
     def __init__(self, browser:str):
 
         os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
         if browser == 'firefox':
-            self.driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+            firefox_service = FirefoxService(GeckoDriverManager().install())
+            self.driver = webdriver.Firefox(service=firefox_service)
         elif browser == 'chrome':
-            self.driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+            chrome_service = ChromeService(ChromeDriverManager().install())
+            self.driver = webdriver.Chrome(service=chrome_service)
         elif browser == 'edge':
-            self.driver =webdriver.Edge(service=EdgeService(EdgeChromiumDriverManager().install()))
+            edge_service = EdgeService(EdgeChromiumDriverManager().install())
+            self.driver =webdriver.Edge(service=edge_service)
         else:
             raise RuntimeError("Invalid browser")
 
-        self.driver.implicitly_wait(self._implicit_wait)
+        self.driver.implicitly_wait(self._implicit_wait_default)
 
 
-    def login(self, username, password, institution):
+    def login(self, username: str, password: str, institution: str) -> None:
 
         self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
@@ -145,21 +151,21 @@ class UsiDriver:
             raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
 
 
-    def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False):
+    def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False) -> bool:
 
         while True:
             try:
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
             except NoSuchElementException or StaleElementReferenceException:
-                self.driver.implicitly_wait(self._implicit_wait)
+                self.driver.implicitly_wait(self._implicit_wait_default)
                 self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
                 search_box = self.driver.find_element(By.ID, 'searchPattern')
 
-            self.driver.implicitly_wait(2)
+            self.driver.implicitly_wait(self._implicit_wait_low)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
-            time.sleep(1)
+            time.sleep(1.5)
 
             course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
@@ -177,7 +183,7 @@ class UsiDriver:
 
                 except NoSuchElementException:
                     logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
-
+                    self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit wait causing Exception
 
             try:
                 reservieren_link = course_table.find_element(By.LINK_TEXT, 'Reservieren')
@@ -193,6 +199,13 @@ class UsiDriver:
                 logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
                 return False
 
+            finally:
+                self.driver.implicitly_wait(self._implicit_wait_low)
+
+    def proceed_to_payment(self) -> None:
+
+        pay_link = self.driver.find_element(By.LINK_TEXT, 'bezahlen')
+        pay_link.click()
 
 def main():
     print(console_header)
@@ -234,10 +247,9 @@ def main():
 
             time.sleep(.5)
 
-        logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden.')
         if n_successes != 0:
-            pay_link = usi_driver.driver.find_element(By.LINK_TEXT, 'bezahlen')
-            pay_link.click()
+            usi_driver.proceed_to_payment()
+            logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden.')
 
     except Exception as e:
         logging.exception("Uncaught exception")
