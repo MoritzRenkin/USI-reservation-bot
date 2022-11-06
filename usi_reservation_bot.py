@@ -183,7 +183,7 @@ class UsiDriver:
 
                 except NoSuchElementException:
                     logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
-                    self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit wait causing Exception
+                    self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit_wait causing Exception
 
             try:
                 reservieren_link = course_table.find_element(By.LINK_TEXT, 'Reservieren')
