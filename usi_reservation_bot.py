@@ -93,17 +93,18 @@ class UsiDriver:
     _implicit_wait_low = 2.5
     _implicit_wait_minimal = .2
 
+    wdm_cache_validity = 5 # days
     def __init__(self, browser:str):
 
         os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
         if browser == 'firefox':
-            firefox_service = FirefoxService(GeckoDriverManager().install())
+            firefox_service = FirefoxService(GeckoDriverManager(cache_valid_range=self.wdm_cache_validity).install())
             self.driver = webdriver.Firefox(service=firefox_service)
         elif browser == 'chrome':
-            chrome_service = ChromeService(ChromeDriverManager().install())
+            chrome_service = ChromeService(ChromeDriverManager(cache_valid_range=self.wdm_cache_validity).install())
             self.driver = webdriver.Chrome(service=chrome_service)
         elif browser == 'edge':
-            edge_service = EdgeService(EdgeChromiumDriverManager().install())
+            edge_service = EdgeService(EdgeChromiumDriverManager(cache_valid_range=self.wdm_cache_validity).install())
             self.driver =webdriver.Edge(service=edge_service)
         else:
             raise RuntimeError("Invalid browser")
