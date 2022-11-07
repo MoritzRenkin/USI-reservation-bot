@@ -89,8 +89,8 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
 class UsiDriver:
 
-    _implicit_wait_default = 7
-    _implicit_wait_low = 2.5
+    _implicit_wait_default = 10
+    _implicit_wait_low = 2
     _implicit_wait_minimal = .2
 
     wdm_cache_validity = 5 # days
@@ -166,7 +166,7 @@ class UsiDriver:
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
-            time.sleep(1.5)
+            time.sleep(.5)
 
             course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
@@ -183,7 +183,8 @@ class UsiDriver:
                     return True
 
                 except NoSuchElementException:
-                    logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
+                    if not wait_for_unlock: # TODO enable this log message for wait_for_unlock in a sensible way
+                        logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
                     self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit_wait causing Exception
 
             try:
