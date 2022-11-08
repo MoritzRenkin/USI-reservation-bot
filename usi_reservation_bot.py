@@ -3,12 +3,10 @@ import sys
 import os
 from datetime import datetime
 import logging
-import time
-import pause
+from time import sleep
 from collections import OrderedDict
-import getpass
-from wakepy import keepawake
-from playsound import playsound
+from getpass import getpass
+import pause
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
@@ -65,7 +63,7 @@ def get_config_kwargs() -> dict:
     for cred_field in ['username', 'passwort']:
         if not kwargs[cred_field]:
             if cred_field == 'passwort':
-                kwargs[cred_field] = getpass.getpass(f"{cred_field}: ") # hide password input
+                kwargs[cred_field] = getpass(f"{cred_field}: ") # hide password input
             else:
                 kwargs[cred_field] = input(f'{cred_field}: ').strip() # no need to hide other input
             assert kwargs[cred_field], f"{cred_field} nicht angegeben!"
@@ -79,6 +77,7 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
         logging.info(f"Pausiert bis {start_time}")
 
         if prevent_screenlock:
+            from wakepy import keepawake
             logging.info("Standby des Betriebssystems wird verhindert.")
             with keepawake(keep_screen_awake=True):
                 pause.until(start_time)
@@ -130,7 +129,7 @@ class UsiDriver:
             self.driver.find_element(By.ID, 'password').send_keys(password)
             self.driver.find_element(By.ID, 'samlloginbutton').click()
 
-            time.sleep(1)
+            sleep(1)
             if 'getconsent' in self.driver.current_url: # Zustimmung zur Weitergabe persönlicher Daten
                 yes_button = self.driver.find_element(By.ID, 'yesbutton')
                 yes_button.click()
@@ -166,7 +165,7 @@ class UsiDriver:
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
-            time.sleep(.5)
+            sleep(.5)
 
             course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
@@ -195,7 +194,7 @@ class UsiDriver:
 
             except NoSuchElementException:
                 if wait_for_unlock:
-                    time.sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
+                    sleep(1)  # prevent too many queries and potentially triggering Anti-DOS measures
                     continue
 
                 logging.warning(f'Kein \'Reservieren\' Link für Kurs {course_id} gefunden!')
@@ -247,7 +246,7 @@ def main():
             except WebDriverException as e:
                 logging.error(f"Webdriver Exception ({e}) bei Kurs {course}. Exisitiert der Kurs?")
 
-            time.sleep(.5)
+            sleep(.5)
 
         if n_successes != 0:
             usi_driver.proceed_to_payment()
@@ -259,6 +258,7 @@ def main():
 
     finally:
         if kwargs['alarm']:
+            from playsound import playsound
             for _ in range(2): # alarm is played twice
                 wav_path = os.path.join(project_directory, "sounds/alarm.wav")
                 playsound(wav_path)
