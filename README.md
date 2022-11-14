@@ -2,7 +2,7 @@
 
 Der USI-reservation-bot kann das Reservieren von Kursen am <a href="https://www.usi.at/" target="_blank">Universitätssportinstitut Wien (USI)</a> automatisieren. Der Bot kann lediglich Reservierungen vornehmen, es werden keine Käufe durch das Programm abgeschlossen.
 
-Hinweis: Das Projekt wurde ausschließlich zu Bildungszwecken entwickelt und jegliche Art von Ausführung erfolgt auf eigene Verantwortung.
+Hinweis: Das Projekt wurde ausschließlich zu Bildungszwecken entwickelt. Jegliche Art von Ausführung erfolgt auf eigene Verantwortung.
 
 ## Setup (nur vor der ersten Verwendung)
 
@@ -33,7 +33,7 @@ Derzeit wird das Login über folgende Institute unterstützt:
 * Universität Wien
 * OpenIdP (alle Anderen)
 
-2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a> oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``).
+2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a> oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen.
 
 
 Der Bot wird in cmd bzw. Terminal gestartet.
