@@ -33,7 +33,7 @@ Derzeit wird das Login über folgende Institute unterstützt:
 * Universität Wien
 * OpenIdP (alle Anderen)
 
-2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a> oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen.
+2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a>, oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen.
 
 
 Der Bot wird in cmd bzw. Terminal gestartet.
