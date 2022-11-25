@@ -182,7 +182,7 @@ class UsiDriver:
                     return True
 
                 except NoSuchElementException:
-                    if not wait_for_unlock: # TODO enable this log message for wait_for_unlock in a sensible way
+                    if not wait_for_unlock: # TODO enable this log message for wait_for_unlock==True in a sensible way
                         logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
                     self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit_wait causing Exception
 
@@ -225,7 +225,7 @@ def main():
     n_total = len(courses_is_year)
     start_time = kwargs['start']
 
-    logging.info(f'{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}')
+    logging.info(f"{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}")
     pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
 
     logging.info("Webdriver wird gestartet...")
