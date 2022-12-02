@@ -22,7 +22,7 @@ python3 -m pip install -r requirements.txt
 
 ## Verwendung
 
-Vor dem Ausführen muss der Bots in der Datei ``config.ini`` konfiguriert werden. Vor allem folgende Felder sollten überprüft und ggf. angepasst werden:
+Vor dem Ausführen muss der Bot in der Datei ``config.ini`` konfiguriert werden. Vor allem folgende Felder sollten überprüft und ggf. angepasst werden:
 * ``login_institution`` siehe unterstützte Institute unterhalb
 * ``kurse_semesterbetrieb`` bzw. ``kurse_jahresbetrieb``
 * ``browser`` Die neueste Version des Browsers muss installiert sein.
