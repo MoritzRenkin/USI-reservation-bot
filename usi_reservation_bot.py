@@ -60,13 +60,17 @@ def get_config_kwargs() -> dict:
     kwargs['alarm'] = True if alarm=="ja" or alarm=="true" else False
 
     # getting username and password if left empty
-    for cred_field in ['username', 'passwort']:
-        if not kwargs[cred_field]:
-            if cred_field == 'passwort':
-                kwargs[cred_field] = getpass(f"{cred_field}: ") # hide password input
-            else:
-                kwargs[cred_field] = input(f'{cred_field}: ').strip() # no need to hide other input
-            assert kwargs[cred_field], f"{cred_field} nicht angegeben!"
+    cred_fields = ['username', 'passwort']
+    if not all(kwargs[cred_field] for cred_field in cred_fields):
+        logging.info(f"Zugangsdaten für {kwargs['login_institution']} fehlen.")
+
+        for cred_field in cred_fields:
+            if not kwargs[cred_field]:
+                if cred_field == 'passwort':
+                    kwargs[cred_field] = getpass(f"{cred_field} (wird nicht angezeigt): ") # hide password input
+                else:
+                    kwargs[cred_field] = input(f'{cred_field}: ').strip() # no need to hide other input
+                assert kwargs[cred_field], f"{cred_field} nicht angegeben!"
 
     return kwargs
 

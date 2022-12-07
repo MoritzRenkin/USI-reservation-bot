@@ -23,17 +23,16 @@ python3 -m pip install -r requirements.txt
 ## Verwendung
 
 Vor dem Ausführen muss der Bot in der Datei ``config.ini`` konfiguriert werden. Vor allem folgende Felder sollten überprüft und ggf. angepasst werden:
-* ``login_institution`` siehe unterstützte Institute unterhalb
+* ``login_institution`` Derzeit wird das Login über folgende Institute unterstützt: 
+  * Technische Universität Wien 
+  * Universität Wien
+  * OpenIdP (alle Anderen)
 * ``kurse_semesterbetrieb`` bzw. ``kurse_jahresbetrieb``
 * ``browser`` Die neueste Version des Browsers muss installiert sein.
 *  ``start`` Der Start der Anmeldungen wird normalerweise auf <a href="https://www.usi.at/">usi.at</a> unter Termine angegeben.
 
-Derzeit wird das Login über folgende Institute unterstützt: 
-* Technische Universität Wien 
-* Universität Wien
-* OpenIdP (alle Anderen)
 
-2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a>, oder Fork erstellen und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen.
+2-Faktor Authentifizierung wird nicht unterstützt. Für andere Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a>, oder Projekt forken und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen.
 
 
 Der Bot wird in cmd bzw. Terminal gestartet.
@@ -48,10 +47,10 @@ macOS/Linux:
 python3 usi_reservation_bot.py
 ```
 
-Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Warnmeldungen der Firewall kommen.
-
 Nachdem der Bot alle Reservierungen abgeschlossen hat, muss der Kaufvorgang in dem vom Bot gesteuerten Browser abgeschlossen werden. USI-Reservierungen verfallen ansonsten nach 30 Minuten. Je nach Konfiguration in ``config.ini`` wird ein Alarmton abgespielt, sobald die manuelle Durchführung des Kaufvorgangs erforderlich ist. Der Alarm kann angepasst werden, indem das File ``sounds/alarm.wav``[^1] ersetzt wird. 
 
 Das Programm bzw. der zugehörige Browser dürfen nicht frühzeitig geschlossen werden, da ansonsten die Reservierungen verloren gehen.
+
+Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Warnmeldungen der Firewall kommen.
 
 [^1]: Der inkludierte Alarmton stammt von <a href="https://mixkit.co/free-sound-effects/alarm/" >mixkit.co</a>
