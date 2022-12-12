@@ -6,6 +6,7 @@ import logging
 from time import sleep
 from collections import OrderedDict
 from getpass import getpass
+
 import pause
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
@@ -78,7 +79,7 @@ def get_config_kwargs() -> dict:
 def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
     if start_time > datetime.now():
-        logging.info(f"Pausiert bis {start_time}")
+        logging.info(f"Pausiert bis {start_time.strftime('%d.%m.%Y, %H:%M').}")
 
         if prevent_screenlock:
             from wakepy import keepawake
