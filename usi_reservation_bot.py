@@ -19,9 +19,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
+from exceptions import UsiLoginException
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s ', stream=sys.stdout)
-logging.getLogger('playsound').setLevel(logging.WARNING)
 project_directory = os.path.dirname(__file__)
 
 console_header = r"""
@@ -79,7 +78,7 @@ def get_config_kwargs() -> dict:
 def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
     if start_time > datetime.now():
-        logging.info(f"Pausiert bis {start_time.strftime('%d.%m.%Y, %H:%M').}")
+        logging.info(f"Pausiert bis {start_time.strftime('%d.%m.%Y, %H:%M')}.")
 
         if prevent_screenlock:
             from wakepy import keepawake
@@ -89,7 +88,6 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
         else:
             pause.until(start_time)
-
 
 class UsiDriver:
 
@@ -151,6 +149,7 @@ class UsiDriver:
 
         try:
             self.driver.find_element(By.ID, 'searchPattern')
+            logging.info("Login erfolgreich.")
         except WebDriverException as e:
             logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
             raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
@@ -231,7 +230,18 @@ def main():
     start_time = kwargs['start']
 
     logging.info(f"{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}")
-    pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
+
+    if start_time > datetime.now():
+        usi_driver = UsiDriver(browser=kwargs['browser'])
+        logging.info("Logindaten werden überprüft.")
+        try:
+            usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution'])
+        except UsiLoginException as e:
+            logging.error("Die Logindaten scheinen nicht zu stimmen.")
+            raise e
+
+        usi_driver.driver.quit()
+        pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
 
     logging.info("Webdriver wird gestartet...")
     usi_driver = UsiDriver(browser=kwargs['browser'])
@@ -249,7 +259,7 @@ def main():
                 is_first_course = False
 
             except WebDriverException as e:
-                logging.error(f"Webdriver Exception ({e}) bei Kurs {course}. Exisitiert der Kurs?")
+                logging.error(f"Webdriver Exception ({e}) bei Kurs {course}. Existiert der Kurs?")
 
             sleep(.5)
 
@@ -277,4 +287,6 @@ def main():
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s ', stream=sys.stdout)
+    logging.getLogger('playsound').setLevel(logging.WARNING)
     main()
