@@ -97,7 +97,7 @@ class UsiDriver:
 
     wdm_cache_validity = 5 # days
     def __init__(self, browser:str):
-
+        logging.info("Webdriver wird gestartet...")
         os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
         if browser == 'firefox':
             firefox_service = FirefoxService(GeckoDriverManager(cache_valid_range=self.wdm_cache_validity).install())
@@ -145,14 +145,14 @@ class UsiDriver:
         # TODO add elif, support more institutions
 
         else:
-            raise RuntimeError(f'Institution {institution} nicht unterstützt.')
+            raise InvalidArgumentException(f'Institution {institution} nicht unterstützt.')
 
         try:
             self.driver.find_element(By.ID, 'searchPattern')
             logging.info("Login erfolgreich.")
-        except WebDriverException as e:
-            logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
-            raise RuntimeError("Searchbox with id searchPattern could not be found after login.")
+        except WebDriverException:
+            # logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
+            raise UsiLoginException("Searchbox with id searchPattern could not be found after login.")
 
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False) -> bool:
@@ -231,22 +231,17 @@ def main():
 
     logging.info(f"{n_total} Kurse werden ab {start_time} in folgender Reihenfolge reserviert: {[k for k,_ in courses_is_year.items()]}")
 
-    if start_time > datetime.now():
-        usi_driver = UsiDriver(browser=kwargs['browser'])
-        logging.info("Logindaten werden überprüft.")
-        try:
-            usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution'])
-        except UsiLoginException as e:
-            logging.error("Die Logindaten scheinen nicht zu stimmen.")
-            raise e
-
-        usi_driver.driver.quit()
-        pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
-
-    logging.info("Webdriver wird gestartet...")
     usi_driver = UsiDriver(browser=kwargs['browser'])
-
     try:
+        if start_time > datetime.now():
+            logging.info("Logindaten werden überprüft.")
+            usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution']) # this will throw an exception if the login data is wrong
+            usi_driver.driver.quit()
+
+            pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
+            usi_driver = UsiDriver(browser=kwargs['browser']) # restarting driver
+
+
         usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution'])
 
         is_first_course = True
@@ -267,8 +262,11 @@ def main():
             usi_driver.proceed_to_payment()
             logging.info(f'{n_successes}/{n_total} Kursen wurden erfolgreich reserviert. Der Bezahlvorgang muss nun manuell im Browser abgeschlossen werden.')
 
+    except UsiLoginException as e:
+        logging.error(f"Login bei {kwargs['login_institution']} gescheitert: {e}")
+
     except Exception as e:
-        logging.exception("Uncaught exception")
+        logging.error("Unerwarteter Fehler. Stacktrace wird nach Beenden des Programms ausgegeben")
         raise e
 
     finally:
