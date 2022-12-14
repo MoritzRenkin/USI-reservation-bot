@@ -113,6 +113,8 @@ class UsiDriver:
 
         self.driver.implicitly_wait(self._implicit_wait_default)
 
+    def __del__(self):
+        self.driver.quit()
 
     def login(self, username: str, password: str, institution: str) -> None:
 
