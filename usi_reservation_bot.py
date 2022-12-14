@@ -96,53 +96,55 @@ class UsiDriver:
     _implicit_wait_minimal = .2
 
     wdm_cache_validity = 5 # days
+
     def __init__(self, browser:str):
+        self._is_driver_alive = False
         logging.info("Webdriver wird gestartet...")
         os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
+
         if browser == 'firefox':
             firefox_service = FirefoxService(GeckoDriverManager(cache_valid_range=self.wdm_cache_validity).install())
-            self.driver = webdriver.Firefox(service=firefox_service)
+            self._driver = webdriver.Firefox(service=firefox_service)
         elif browser == 'chrome':
             chrome_service = ChromeService(ChromeDriverManager(cache_valid_range=self.wdm_cache_validity).install())
-            self.driver = webdriver.Chrome(service=chrome_service)
+            self._driver = webdriver.Chrome(service=chrome_service)
         elif browser == 'edge':
             edge_service = EdgeService(EdgeChromiumDriverManager(cache_valid_range=self.wdm_cache_validity).install())
-            self.driver =webdriver.Edge(service=edge_service)
+            self._driver =webdriver.Edge(service=edge_service)
         else:
             raise RuntimeError("Invalid browser")
 
-        self.driver.implicitly_wait(self._implicit_wait_default)
-
-    def __del__(self):
-        self.driver.quit()
+        self._is_driver_alive = True
+        self._driver.implicitly_wait(self._implicit_wait_default)
 
     def login(self, username: str, password: str, institution: str) -> None:
+        assert self._is_driver_alive
 
-        self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
+        self._driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
-        uni_dropdown = Select(self.driver.find_element(By.ID, ('idpSelectSelector')))
+        uni_dropdown = Select(self._driver.find_element(By.ID, ('idpSelectSelector')))
         uni_dropdown.select_by_visible_text(institution)
-        self.driver.find_element(By.ID, 'idpSelectListButton').click()
+        self._driver.find_element(By.ID, 'idpSelectListButton').click()
 
         if institution == 'Universität Wien':
-            self.driver.find_element(By.ID, 'userid').send_keys(username)
-            self.driver.find_element(By.ID, 'password').send_keys(password)
-            self.driver.find_element(By.CSS_SELECTOR, '.loginform > div:nth-child(4) > div:nth-child(1) > button:nth-child(1)').click()
+            self._driver.find_element(By.ID, 'userid').send_keys(username)
+            self._driver.find_element(By.ID, 'password').send_keys(password)
+            self._driver.find_element(By.CSS_SELECTOR, '.loginform > div:nth-child(4) > div:nth-child(1) > button:nth-child(1)').click()
 
         elif institution == 'Technische Universität Wien':
-            self.driver.find_element(By.ID, 'username').send_keys(username)
-            self.driver.find_element(By.ID, 'password').send_keys(password)
-            self.driver.find_element(By.ID, 'samlloginbutton').click()
+            self._driver.find_element(By.ID, 'username').send_keys(username)
+            self._driver.find_element(By.ID, 'password').send_keys(password)
+            self._driver.find_element(By.ID, 'samlloginbutton').click()
 
             sleep(1)
-            if 'getconsent' in self.driver.current_url: # Zustimmung zur Weitergabe persönlicher Daten
-                yes_button = self.driver.find_element(By.ID, 'yesbutton')
+            if 'getconsent' in self._driver.current_url: # Zustimmung zur Weitergabe persönlicher Daten
+                yes_button = self._driver.find_element(By.ID, 'yesbutton')
                 yes_button.click()
 
         elif institution == 'OpenIdP (alle Anderen)':
-            self.driver.find_element(By.ID, 'username').send_keys(username)
-            self.driver.find_element(By.ID, 'password').send_keys(password)
-            self.driver.find_element(By.ID, 'regularsubmit').click()
+            self._driver.find_element(By.ID, 'username').send_keys(username)
+            self._driver.find_element(By.ID, 'password').send_keys(password)
+            self._driver.find_element(By.ID, 'regularsubmit').click()
 
         # TODO add elif, support more institutions
 
@@ -150,7 +152,7 @@ class UsiDriver:
             raise InvalidArgumentException(f'Institution {institution} nicht unterstützt.')
 
         try:
-            self.driver.find_element(By.ID, 'searchPattern')
+            self._driver.find_element(By.ID, 'searchPattern')
             logging.info("Login erfolgreich.")
         except WebDriverException:
             # logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
@@ -158,22 +160,23 @@ class UsiDriver:
 
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False) -> bool:
+        assert self._is_driver_alive
 
         while True:
             try:
-                search_box = self.driver.find_element(By.ID, 'searchPattern')
+                search_box = self._driver.find_element(By.ID, 'searchPattern')
             except NoSuchElementException or StaleElementReferenceException:
-                self.driver.implicitly_wait(self._implicit_wait_default)
-                self.driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
-                search_box = self.driver.find_element(By.ID, 'searchPattern')
+                self._driver.implicitly_wait(self._implicit_wait_default)
+                self._driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
+                search_box = self._driver.find_element(By.ID, 'searchPattern')
 
-            self.driver.implicitly_wait(self._implicit_wait_low)
+            self._driver.implicitly_wait(self._implicit_wait_low)
             search_box.clear()
             search_box.send_keys(course_id)
             search_box.submit()
             sleep(.5)
 
-            course_table = self.driver.find_element(By.CLASS_NAME, "tablewithbottom")
+            course_table = self._driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
 
             if 'Ausgebucht' in reservation_cell.get_attribute('innerHTML').strip():
@@ -190,7 +193,7 @@ class UsiDriver:
                 except NoSuchElementException:
                     if not wait_for_unlock: # TODO enable this log message for wait_for_unlock==True in a sensible way
                         logging.warning(f"Link für Jahresbetrieb wurde bei Kurs {course_id} nicht gefunden. Link für Semesterbetrieb wird als Backup gesucht.")
-                    self.driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit_wait causing Exception
+                    self._driver.implicitly_wait(self._implicit_wait_minimal) # page should have already loaded after implicit_wait causing Exception
 
             try:
                 reservieren_link = course_table.find_element(By.LINK_TEXT, 'Reservieren')
@@ -207,12 +210,24 @@ class UsiDriver:
                 return False
 
             finally:
-                self.driver.implicitly_wait(self._implicit_wait_low)
+                self._driver.implicitly_wait(self._implicit_wait_low)
 
     def proceed_to_payment(self) -> None:
 
-        pay_link = self.driver.find_element(By.LINK_TEXT, 'bezahlen')
+        pay_link = self._driver.find_element(By.LINK_TEXT, 'bezahlen')
         pay_link.click()
+
+    def quit(self) -> None:
+        """
+        call webdriver.quit()
+        """
+        if self._is_driver_alive:
+            self._driver.quit()
+
+        self._is_driver_alive = False
+
+    def __del__(self):
+        self.quit()
 
 def main():
     print(console_header)
@@ -238,7 +253,7 @@ def main():
         if start_time > datetime.now():
             logging.info("Logindaten werden überprüft.")
             usi_driver.login(username=kwargs['username'], password=kwargs['passwort'], institution=kwargs['login_institution']) # this will throw an exception if the login data is wrong
-            usi_driver.driver.quit()
+            usi_driver.quit()
 
             pause_until_start(start_time=start_time, prevent_screenlock=kwargs['os_standby_verhindern'])
             usi_driver = UsiDriver(browser=kwargs['browser']) # restarting driver
@@ -283,7 +298,7 @@ def main():
             answer = input("Tippe \'q\' und enter, NACHDEM der Kaufvorgang abschlossen ist um das Skript zu beenden. Schließe dieses Fenseter NICHT! ")
             answer = answer.strip()
 
-        usi_driver.driver.quit()
+        usi_driver.quit()
 
 
 if __name__ == '__main__':
