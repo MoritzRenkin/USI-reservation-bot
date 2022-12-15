@@ -122,7 +122,7 @@ class UsiDriver:
 
         self._driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
 
-        uni_dropdown = Select(self._driver.find_element(By.ID, ('idpSelectSelector')))
+        uni_dropdown = Select(self._driver.find_element(By.ID, 'idpSelectSelector'))
         uni_dropdown.select_by_visible_text(institution)
         self._driver.find_element(By.ID, 'idpSelectListButton').click()
 
@@ -157,6 +157,30 @@ class UsiDriver:
         except WebDriverException:
             # logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
             raise UsiLoginException("Searchbox with id searchPattern could not be found after login.")
+
+    def _search_course(self, course_id:str) -> bool:
+        """
+        Prerequisite: Driver needs to be on the usi registration page.
+        """
+        try:
+            search_box = self._driver.find_element(By.ID, 'searchPattern')
+        except NoSuchElementException or StaleElementReferenceException:
+            self._driver.implicitly_wait(self._implicit_wait_default)
+            self._driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
+            search_box = self._driver.find_element(By.ID, 'searchPattern')
+
+        self._driver.implicitly_wait(self._implicit_wait_low)
+        search_box.clear()
+        search_box.send_keys(course_id)
+        search_box.submit()
+        sleep(.5)
+        raise NotImplementedError()
+
+    def _reserve_year_course(self, course_id:str) -> bool:
+        assert self._is_driver_alive
+        raise NotImplementedError()
+
+
 
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False) -> bool:
