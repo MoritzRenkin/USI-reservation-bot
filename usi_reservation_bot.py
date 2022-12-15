@@ -158,7 +158,7 @@ class UsiDriver:
             # logging.error(f"Unerwartetes Verhalten nach Login. Stimmen die Login-Daten?")
             raise UsiLoginException("Searchbox with id searchPattern could not be found after login.")
 
-    def _search_course(self, course_id:str) -> bool:
+    def _search_course(self, course_id:str) -> None:
         """
         Prerequisite: Driver needs to be on the usi registration page.
         """
@@ -174,31 +174,20 @@ class UsiDriver:
         search_box.send_keys(course_id)
         search_box.submit()
         sleep(.5)
-        raise NotImplementedError()
 
     def _reserve_year_course(self, course_id:str) -> bool:
         assert self._is_driver_alive
         raise NotImplementedError()
 
-
-
+    def reserve_semester_course(self, course_id:str) -> bool:
+        assert self._is_driver_alive
+        raise NotImplementedError()
 
     def reserve_course(self, course_id:str, jahresbetrieb:bool, wait_for_unlock:bool=False) -> bool:
         assert self._is_driver_alive
 
         while True:
-            try:
-                search_box = self._driver.find_element(By.ID, 'searchPattern')
-            except NoSuchElementException or StaleElementReferenceException:
-                self._driver.implicitly_wait(self._implicit_wait_default)
-                self._driver.get('https://www.usi-wien.at/anmeldung/?lang=de')
-                search_box = self._driver.find_element(By.ID, 'searchPattern')
-
-            self._driver.implicitly_wait(self._implicit_wait_low)
-            search_box.clear()
-            search_box.send_keys(course_id)
-            search_box.submit()
-            sleep(.5)
+            self._search_course(course_id=course_id)
 
             course_table = self._driver.find_element(By.CLASS_NAME, "tablewithbottom")
             reservation_cell = course_table.find_element(By.CSS_SELECTOR,"tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(5)")
