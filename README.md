@@ -23,7 +23,7 @@ python3 -m pip install -r requirements.txt
 ## Verwendung
 
 Vor dem Ausführen muss der Bot in der Datei ``config.ini`` konfiguriert werden. Vor allem folgende Felder sollten überprüft und ggf. angepasst werden:
-* ``login_institution`` Derzeit wird das Login über folgende Institute unterstützt[^institutes]: 
+* ``login_institution`` Derzeit wird das Login über folgende Institute unterstützt[^institutes][^2factor]: 
   * Technische Universität Wien 
   * Universität Wien
   * OpenIdP (alle Anderen)
@@ -50,4 +50,5 @@ Das Programm bzw. der zugehörige Browser dürfen nicht frühzeitig geschlossen 
 Der Bot verwendet <a href="https://www.selenium.dev/">Selenium</a> Webdriver zur Fernsteuerung des gewählten Browsers. Bei erstmaliger Verwendung des Programms wird der jeweilige Driver heruntergeladen und in ``.wdm`` abgelegt. Möglicherweise kann es hierbei zu Warnmeldungen der Firewall kommen.
 
 [^mixkit]: Der inkludierte Alarmton stammt von <a href="https://mixkit.co/free-sound-effects/alarm/" >mixkit.co</a>
-[^institutes]: Für andere Login-Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a>, oder Projekt forken und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen. 2-Faktor Authentifizierung wird nicht unterstützt. 
+[^institutes]: Für andere Login-Institute oder neue Features gerne einen <a href="https://github.com/MoritzRenkin/USI-reservation-bot/issues">Issue erzeugen</a>, oder Projekt forken und selbst hinzufügen (siehe TODO-Element in `` usi_reservation_bot.py ``). Pull requests sind willkommen. 
+[^2factor]: 2-Faktor Authentifizierung wird nicht unterstützt. 
