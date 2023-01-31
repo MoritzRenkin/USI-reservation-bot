@@ -29,7 +29,7 @@ Vor dem Ausführen muss der Bot in der Datei ``config.ini`` konfiguriert werden.
   * OpenIdP (alle Anderen)
 * ``kurse_semesterbetrieb`` bzw. ``kurse_jahresbetrieb``
 * ``browser`` Die neueste Version des Browsers muss installiert sein.
-*  ``start`` Der Start der Anmeldungen wird normalerweise auf <a href="https://www.usi.at/">usi.at</a> unter Termine angegeben.
+*  ``start`` Der Start der Anmeldungen wird normalerweise auf <a href="https://www.usi.at/de/termine/termine/">usi.at</a> unter Termine angegeben.
 
 Der Bot wird in cmd bzw. Terminal gestartet.
 
