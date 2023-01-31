@@ -19,8 +19,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
-from exceptions import UsiLoginException
-
 project_directory = os.path.dirname(__file__)
 
 console_header = r"""
@@ -88,6 +86,9 @@ def pause_until_start(start_time: datetime, prevent_screenlock: bool) -> None:
 
         else:
             pause.until(start_time)
+
+class UsiLoginException(Exception):
+    pass
 
 class UsiDriver:
 
