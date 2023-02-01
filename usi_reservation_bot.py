@@ -15,6 +15,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
@@ -100,18 +102,22 @@ class UsiDriver:
 
     def __init__(self, browser:str):
         self._is_driver_alive = False
-        logging.info("Webdriver wird gestartet...")
+        logging.info(f"{browser} webdriver wird gestartet...")
         os.environ['WDM_LOCAL'] = '1' # save drivers in locally in project directory instead of ~/.wdm
 
         if browser == 'firefox':
             firefox_service = FirefoxService(GeckoDriverManager(cache_valid_range=self.wdm_cache_validity).install())
             self._driver = webdriver.Firefox(service=firefox_service)
         elif browser == 'chrome':
+            chrome_options = ChromeOptions()
+            chrome_options.add_argument("--log-level=3")
             chrome_service = ChromeService(ChromeDriverManager(cache_valid_range=self.wdm_cache_validity).install())
-            self._driver = webdriver.Chrome(service=chrome_service)
+            self._driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
         elif browser == 'edge':
+            edge_options = EdgeOptions()
+            edge_options.add_argument("--log-level=3")
             edge_service = EdgeService(EdgeChromiumDriverManager(cache_valid_range=self.wdm_cache_validity).install())
-            self._driver =webdriver.Edge(service=edge_service)
+            self._driver = webdriver.Edge(service=edge_service, options=edge_options)
         else:
             raise RuntimeError("Invalid browser")
 
