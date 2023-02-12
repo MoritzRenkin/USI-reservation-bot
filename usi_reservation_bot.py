@@ -148,6 +148,11 @@ class UsiDriver:
                 yes_button = self._driver.find_element(By.ID, 'yesbutton')
                 yes_button.click()
 
+        elif institution == 'Wirschaftsuniversität Wien':
+            self._driver.find_element(By.ID, 'username').send_keys(username)
+            self._driver.find_element(By.ID, 'password').send_keys(password)
+            self._driver.find_element(By.CSS_SELECTOR, '.b3k_submit_button').click()
+
         elif institution == 'OpenIdP (alle Anderen)':
             self._driver.find_element(By.ID, 'username').send_keys(username)
             self._driver.find_element(By.ID, 'password').send_keys(password)

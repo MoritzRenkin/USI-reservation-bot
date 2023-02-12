@@ -26,6 +26,7 @@ Vor dem Ausführen muss der Bot in der Datei ``config.ini`` konfiguriert werden.
 * ``login_institution`` Derzeit wird das Login über folgende Institute unterstützt[^institutes][^2factor]: 
   * Technische Universität Wien 
   * Universität Wien
+  * Wirschaftsuniversität Wien
   * OpenIdP (alle Anderen)
 * ``kurse_semesterbetrieb`` bzw. ``kurse_jahresbetrieb``
 * ``browser`` Die neueste Version des Browsers muss installiert sein.
